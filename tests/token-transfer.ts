@@ -25,7 +25,7 @@ describe("token-transfer", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.TokenTransfer as Program<TestToken>;
+  const program = anchor.workspace.TestToken as Program<TestToken>;
 
   let mint: anchor.web3.PublicKey;
   let fromTokenAccount: anchor.web3.PublicKey;
