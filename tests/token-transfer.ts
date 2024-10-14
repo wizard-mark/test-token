@@ -8,6 +8,7 @@ import {
   mintTo,
 } from "@solana/spl-token";
 import { assert } from "chai";
+import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 describe("token-transfer", () => {
   const provider = anchor.AnchorProvider.env();
@@ -18,38 +19,63 @@ describe("token-transfer", () => {
   let mint: anchor.web3.PublicKey;
   let fromTokenAccount: anchor.web3.PublicKey;
   let toTokenAccount: anchor.web3.PublicKey;
+  let fromWallet: Keypair;
+  let toWallet: Keypair;
 
   const amount = new anchor.BN(1000000);
+
+  before(async () => {
+    // Generate two new keypairs
+    fromWallet = Keypair.generate();
+    toWallet = Keypair.generate();
+
+    // Request SOL for both wallets
+    await provider.connection.requestAirdrop(
+      fromWallet.publicKey,
+      2 * LAMPORTS_PER_SOL
+    );
+    await provider.connection.requestAirdrop(
+      toWallet.publicKey,
+      2 * LAMPORTS_PER_SOL
+    );
+
+    let latestBlock = await provider.connection.getLatestBlockhash();
+    // Wait for the airdrop transactions to confirm
+    await provider.connection.confirmTransaction(
+      latestBlock.blockhash,
+      "confirmed"
+    );
+  });
 
   it("Initialize test state", async () => {
     mint = await createMint(
       provider.connection,
-      provider.wallet.payer,
-      provider.wallet.publicKey,
+      fromWallet,
+      fromWallet.publicKey,
       null,
       6
     );
 
     fromTokenAccount = await createAccount(
       provider.connection,
-      provider.wallet.payer,
+      fromWallet,
       mint,
-      provider.wallet.publicKey
+      fromWallet.publicKey
     );
 
     toTokenAccount = await createAccount(
       provider.connection,
-      provider.wallet.payer,
+      toWallet,
       mint,
-      provider.wallet.publicKey
+      toWallet.publicKey
     );
 
     await mintTo(
       provider.connection,
-      provider.wallet.payer,
+      fromWallet,
       mint,
       fromTokenAccount,
-      provider.wallet.payer,
+      fromWallet,
       1000000
     );
   });
@@ -60,9 +86,10 @@ describe("token-transfer", () => {
       .accounts({
         from: fromTokenAccount,
         to: toTokenAccount,
-        authority: provider.wallet.publicKey,
+        authority: fromWallet.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
+      .signers([fromWallet])
       .rpc();
 
     const fromBalance = await provider.connection.getTokenAccountBalance(
