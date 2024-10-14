@@ -4,7 +4,7 @@ use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 declare_id!("Ey2i2hw8t6GZgpr6uvJgVCnf8iLeQ7ZgBANBXR8KToUm");
 
 #[program]
-pub mod token_transfer {
+pub mod token_token {
     use super::*;
 
     pub fn transfer_token(ctx: Context<TransferToken>, amount: u64) -> Result<()> {
