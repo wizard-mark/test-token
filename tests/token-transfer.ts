@@ -8,7 +8,18 @@ import {
   mintTo,
 } from "@solana/spl-token";
 import { assert } from "chai";
-import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  LAMPORTS_PER_SOL,
+  VersionedMessage,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
 describe("token-transfer", () => {
   const provider = anchor.AnchorProvider.env();
@@ -24,20 +35,30 @@ describe("token-transfer", () => {
 
   const amount = new anchor.BN(1000000);
 
+  async function requestAirdrop(connection: Connection, publicKey: PublicKey) {
+    const airdropSignature = await connection.requestAirdrop(
+      publicKey,
+      LAMPORTS_PER_SOL
+    );
+    const latestBlockhash = await connection.getLatestBlockhash();
+    await connection.confirmTransaction(
+      {
+        signature: airdropSignature,
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+      },
+      "confirmed"
+    );
+  }
+
   before(async () => {
     // Generate two new keypairs
     fromWallet = Keypair.generate();
     toWallet = Keypair.generate();
 
     // Request SOL for both wallets
-    await provider.connection.requestAirdrop(
-      fromWallet.publicKey,
-      2 * LAMPORTS_PER_SOL
-    );
-    await provider.connection.requestAirdrop(
-      toWallet.publicKey,
-      2 * LAMPORTS_PER_SOL
-    );
+    await requestAirdrop(provider.connection, fromWallet.publicKey);
+    await requestAirdrop(provider.connection, toWallet.publicKey);
 
     // let latestBlock = await provider.connection.getLatestBlockhash();
     // // Wait for the airdrop transactions to confirm
