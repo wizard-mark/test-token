@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { TokenTransfer } from "../target/types/token_transfer";
+import { TestToken } from "../target/types/test_token";
 import {
   TOKEN_PROGRAM_ID,
   createMint,
@@ -25,7 +25,7 @@ describe("token-transfer", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.TokenTransfer as Program<TokenTransfer>;
+  const program = anchor.workspace.TokenTransfer as Program<TestToken>;
 
   let mint: anchor.web3.PublicKey;
   let fromTokenAccount: anchor.web3.PublicKey;
