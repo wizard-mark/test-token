@@ -39,12 +39,12 @@ describe("token-transfer", () => {
       2 * LAMPORTS_PER_SOL
     );
 
-    let latestBlock = await provider.connection.getLatestBlockhash();
-    // Wait for the airdrop transactions to confirm
-    await provider.connection.confirmTransaction(
-      latestBlock.blockhash,
-      "confirmed"
-    );
+    // let latestBlock = await provider.connection.getLatestBlockhash();
+    // // Wait for the airdrop transactions to confirm
+    // await provider.connection.confirmTransaction(
+    //   latestBlock.blockhash,
+    //   "confirmed"
+    // );
   });
 
   it("Initialize test state", async () => {
